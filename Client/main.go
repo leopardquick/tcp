@@ -7,9 +7,12 @@ import (
 	"os"
 	"syscall"
 	"time"
+
+	. "github.com/leopardquick/tcp/client/Tlv"
 )
 
 func main() {
+
 	log := log.New(os.Stdin, "message ", 1)
 
 	dl := time.Now().Add(5 * time.Second)
@@ -39,7 +42,52 @@ func main() {
 		log.Fatal("context deadline exceed")
 	}
 
-	conn.Write([]byte("server receive"))
-
 	defer conn.Close()
+
+	conn.SetDeadline(time.Now().Add(5 * time.Second))
+
+	b1 := new(Binary)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for {
+		n, err := b1.ReadFrom(conn)
+
+		if err != nil {
+			log.Fatal(err.Error())
+			break
+		}
+		log.Printf("value : %v b1 : %v", n, b1)
+	}
+
+	conn.Close()
+
 }
+
+// func Decoder(r io.Reader) (Payload, error) {
+
+// 	var typ uint8
+// 	err := binary.Read(r, binary.BigEndian, &typ)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	var payload Payload
+
+// 	switch typ {
+// 	case BinaryType:
+// 		payload = new(Binary)
+// 	case StringType:
+// 		payload = new(String)
+// 	}
+
+// 	_, err = payload.ReadFrom(
+// 		io.MultiReader(bytes.NewReader([]byte{typ}), r))
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	return payload, nil
+// }
