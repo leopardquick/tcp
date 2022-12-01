@@ -61,7 +61,41 @@ func main() {
 
 	}()
 
-	client, err := net.Dial("tcp", server.Addr().String())
+	proxyServer, err := net.Listen("tcp", "127.0.0.1:")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	go func() {
+
+		for {
+			from, err := proxyServer.Accept()
+			if err != nil {
+				break
+			}
+
+			go func(from net.Conn) {
+				defer from.Close()
+
+				to, err := net.Dial("tcp", server.Addr().String())
+
+				if err != nil {
+					return
+				}
+
+				err = Proxy(from, to)
+
+				if err != nil {
+					return
+				}
+
+			}(from)
+
+		}
+	}()
+
+	client, err := net.Dial("tcp", proxyServer.Addr().String())
 
 	if err != nil {
 		log.Fatal(err.Error())
@@ -89,7 +123,7 @@ func main() {
 			log.Fatal(err.Error())
 		}
 
-		log.Printf(" %v  reply %v", msg[i].message, string(b[:nc]))
+		log.Printf(" %v  -> proxy ->  %v", msg[i].message, string(b[:nc]))
 	}
 
 	<-done
