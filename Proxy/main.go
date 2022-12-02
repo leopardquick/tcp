@@ -33,6 +33,7 @@ func main() {
 				buf := make([]byte, 1024)
 
 				for {
+
 					n, err := con.Read(buf)
 					if err != nil {
 						if err == io.EOF {

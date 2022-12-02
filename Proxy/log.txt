@@ -1,0 +1,4 @@
+proxy ping  -> proxy ->  pong
+proxy pong  -> proxy ->  pong
+proxy echo  -> proxy ->  echo
+proxy ping  -> proxy ->  pong
